@@ -1,0 +1,9 @@
+notify_on: failure
+capture:
+  max_stdout_bytes: 65536
+  max_stderr_bytes: 65536
+channels:
+  - type: telegram
+    bot_token_env: TELEGRAM_BOT_TOKEN 
+    chat_id: "6619649708"
+    timeout: 5s

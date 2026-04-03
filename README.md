@@ -23,7 +23,7 @@ runpost [flags] -- <command> [args...]
 
 常用参数：
 
-- `--config <path>`：配置文件路径（支持 json；yaml 为内置简化解析器）。
+- `--config <path>`：配置文件路径（支持 json；yaml 为内置简化解析器）。不传时默认按文件名顺序加载 `~/.config/runpost/*.yaml`。
 - `--notify-on <always|failure|timeout|never>`：覆盖配置中的通知策略。
 - `--timeout <duration>`：子命令超时（例如 `30s`）。
 - `--max-capture-bytes <n>`：stdout/stderr 捕获上限（尾部）。

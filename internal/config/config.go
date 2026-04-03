@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -46,28 +47,59 @@ func Default() Config {
 func Load(path string) (Config, error) {
 	cfg := Default()
 	if strings.TrimSpace(path) == "" {
-		return cfg, nil
-	}
-
-	b, err := os.ReadFile(path)
-	if err != nil {
-		return cfg, err
-	}
-
-	ext := strings.ToLower(filepath.Ext(path))
-	if ext == ".json" {
-		if err := json.Unmarshal(b, &cfg); err != nil {
-			return cfg, fmt.Errorf("parse json config: %w", err)
+		paths, err := defaultConfigFiles()
+		if err != nil {
+			return cfg, err
+		}
+		for _, p := range paths {
+			if err := loadFileInto(&cfg, p); err != nil {
+				return cfg, err
+			}
 		}
 		applyDefaults(&cfg)
 		return cfg, nil
 	}
 
-	if err := parseSimpleYAML(string(b), &cfg); err != nil {
-		return cfg, fmt.Errorf("parse yaml config: %w", err)
+	if err := loadFileInto(&cfg, path); err != nil {
+		return cfg, err
 	}
 	applyDefaults(&cfg)
 	return cfg, nil
+}
+
+func defaultConfigFiles() ([]string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+
+	pattern := filepath.Join(home, ".config", "runpost", "*.yaml")
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		return nil, err
+	}
+	sort.Strings(matches)
+	return matches, nil
+}
+
+func loadFileInto(cfg *Config, path string) error {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	ext := strings.ToLower(filepath.Ext(path))
+	if ext == ".json" {
+		if err := json.Unmarshal(b, cfg); err != nil {
+			return fmt.Errorf("parse json config %s: %w", path, err)
+		}
+		return nil
+	}
+
+	if err := parseSimpleYAML(string(b), cfg); err != nil {
+		return fmt.Errorf("parse yaml config %s: %w", path, err)
+	}
+	return nil
 }
 
 func ChannelTimeout(raw string) time.Duration {

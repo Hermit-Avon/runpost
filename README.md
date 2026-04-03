@@ -29,6 +29,17 @@ make build
 - `make clean`
 - `make run`
 
+## CI 与发布
+
+仓库已配置 GitHub Actions：
+
+1. `Test` 在 `ubuntu-latest`、`macos-latest`、`windows-latest` 上并行执行 `go test ./...`。
+2. `Build` 产出以下二进制文件：
+   - `runpost-linux-amd64`
+   - `runpost-darwin-amd64`
+   - `runpost-windows-amd64.exe`
+3. 打 tag（`v*`）时会自动创建 Release，并上传三平台产物。
+
 ## 用法
 
 ```bash
@@ -68,6 +79,49 @@ channels:
     chat_id: "123456"
     timeout: 5s
 ```
+
+## Telegram Bot 配置
+
+### 1) 创建 Bot 并获取 Token
+
+1. 在 Telegram 打开 `@BotFather`。
+2. 发送 `/newbot`，按提示设置 bot 名称和用户名。
+3. 创建成功后会得到一个 bot token（形如 `123456:ABC...`）。
+
+### 2) 获取 chat_id
+
+1. 先给你的 bot 发一条消息（私聊或群聊中 @bot）。
+2. 调用：
+
+```bash
+curl "https://api.telegram.org/bot<你的TOKEN>/getUpdates"
+```
+
+3. 在返回 JSON 中找到 `message.chat.id`，这就是 `chat_id`。
+
+### 3) 设置环境变量
+
+```bash
+export TELEGRAM_BOT_TOKEN='<你的TOKEN>'
+```
+
+Windows PowerShell:
+
+```powershell
+$env:TELEGRAM_BOT_TOKEN = '<你的TOKEN>'
+```
+
+### 4) 配置 runpost
+
+```yaml
+channels:
+  - type: telegram
+    bot_token_env: TELEGRAM_BOT_TOKEN
+    chat_id: "123456789"
+    timeout: 5s
+```
+
+建议先用 `--dry-run` 验证消息渲染，再执行真实命令发送通知。
 
 ## 配置加载规则
 

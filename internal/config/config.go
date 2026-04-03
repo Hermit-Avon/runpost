@@ -68,7 +68,7 @@ func Load(path string) (Config, error) {
 }
 
 func defaultConfigFiles() ([]string, error) {
-	home, err := os.UserHomeDir()
+	home, err := resolveHomeDir()
 	if err != nil {
 		return nil, err
 	}
@@ -80,6 +80,13 @@ func defaultConfigFiles() ([]string, error) {
 	}
 	sort.Strings(matches)
 	return matches, nil
+}
+
+func resolveHomeDir() (string, error) {
+	if h := strings.TrimSpace(os.Getenv("HOME")); h != "" {
+		return h, nil
+	}
+	return os.UserHomeDir()
 }
 
 func loadFileInto(cfg *Config, path string) error {

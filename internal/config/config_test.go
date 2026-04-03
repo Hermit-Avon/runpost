@@ -9,6 +9,7 @@ import (
 func TestLoad_EmptyPath_NoDefaultDir(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
 
 	cfg, err := Load("")
 	if err != nil {
@@ -29,6 +30,7 @@ func TestLoad_EmptyPath_NoDefaultDir(t *testing.T) {
 func TestLoad_EmptyPath_LoadsAndMergesDefaultYamlFiles(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
 
 	cfgDir := filepath.Join(home, ".config", "runpost")
 	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
